@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Builder | Central Hospital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Spreadsheet Parsing Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --iphone-width: 375px;
+            --iphone-height: 812px;
+            --sidebar-width: 450px;
+            --ios-blue: #007AFF;
+            --ios-grey: #E9E9EB;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR CONFIGURATOR */
+        #config-panel {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #E2E8F0;
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        body.sidebar-hidden #config-panel {
+            transform: translateX(-100%);
+            margin-right: calc(var(--sidebar-width) * -1);
+        }
+
+        .scroll-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background-color: #fbfcfd;
+        }
+
+        .step-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .input-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        #preview-area {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background-color: #F1F5F9;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .viewport-container {
+            width: var(--iphone-width);
+            height: var(--iphone-height);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .iphone-frame {
+            width: var(--iphone-width);
+            height: var(--iphone-height);
+            background-color: white;
+            border-radius: 40px;
+            box-shadow: 0 0 0 12px #1F2937, 0 0 0 14px #4B5563, 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform-origin: center center;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background-color: #1F2937;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 50;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            padding: 20px 14px;
+            padding-top: 100px;
+            padding-bottom: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            scrollbar-width: none;
+        }
+        .chat-container::-webkit-scrollbar { display: none; }
+
+        .bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.35;
+            position: relative;
+            animation: popIn 0.2s ease-out forwards;
+            opacity: 0;
+        }
+
+        .bubble-bot { background-color: var(--ios-grey); color: black; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .bubble-user { background-color: var(--ios-blue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+        .ios-input-container {
+            background: white;
+            border-top: 1px solid #E5E7EB;
+            padding: 10px 12px 34px 12px;
+            z-index: 40;
+        }
+
+        .ios-bar { display: flex; align-items: center; gap: 12px; }
+        .ios-field { 
+            flex-grow: 1; 
+            background: white; 
+            border: 1px solid #D1D5DB; 
+            border-radius: 20px; 
+            padding: 6px 14px; 
+            font-size: 15px; 
+            color: #111827; 
+            min-height: 34px; 
+            display: flex; 
+            align-items: center; 
+            overflow: hidden;
+            white-space: pre-wrap;
+        }
+        
+        .ios-icon { 
+            color: #9CA3AF; 
+            font-size: 20px; 
+            cursor: pointer; 
+            transition: all 0.2s;
+        }
+        
+        .ios-icon-ready {
+            color: var(--ios-blue) !important;
+            animation: pulse-camera 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-camera {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .ios-send-btn { width: 30px; height: 30px; background-color: #E5E7EB; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: background-color 0.2s; }
+        .ios-send-btn.active { background-color: var(--ios-blue); }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .status-bar { position: absolute; top: 14px; left: 30px; right: 30px; display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; z-index: 50; }
+        .home-bar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 130px; height: 5px; background-color: #1F2937; border-radius: 10px; z-index: 50; }
+        
+        #open-config-btn { 
+            position: fixed; 
+            top: 20px; 
+            left: 20px; 
+            z-index: 300; 
+            display: none; 
+            cursor: pointer; 
+        }
+        body.sidebar-hidden #open-config-btn { display: flex; }
+    </style>
+</head>
+<body id="main-body">
+
+    <!-- SIDEBAR -->
+    <div id="config-panel">
+        <div class="p-6 border-b border-slate-200 bg-white flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">Demo Builder</h1>
+                <p class="text-xs text-slate-500">Visual Script Editor</p>
+            </div>
+            <button onclick="toggleConfig()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+        </div>
+        
+        <div class="scroll-area" id="editor-container">
+            <div class="mb-6 space-y-4">
+                <div>
+                    <label class="input-label">Hospital Branding</label>
+                    <input type="text" id="hosp-name-input" oninput="updateHospName(this.value)"
+                        class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm"
+                        placeholder="Hospital Name">
+                </div>
+                <div>
+                    <label class="input-label">Script Management</label>
+                    <div class="flex gap-2">
+                        <button onclick="document.getElementById('file-import').click()" class="flex-1 bg-slate-800 text-white text-[10px] font-bold py-2 px-3 rounded-lg hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-import"></i> Import File
+                        </button>
+                        <button onclick="downloadTemplate()" class="bg-slate-100 text-slate-600 text-[10px] font-bold py-2 px-3 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 border border-slate-200">
+                            <i class="fa-solid fa-download"></i> Template
+                        </button>
+                        <input type="file" id="file-import" class="hidden" accept=".xlsx, .csv" onchange="importFile(this)">
+                    </div>
+                </div>
+            </div>
+            <div id="form-steps-list"></div>
+        </div>
+        
+        <div class="p-6 bg-white border-t border-slate-100 shadow-[0_-4px_10px_rgba(0,0,0,0.03)] flex gap-2">
+            <button onclick="applyAndRestart()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play"></i> Apply & Restart
+            </button>
+            <button onclick="resetDefaults()" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all" title="Reset Defaults">
+                <i class="fa-solid fa-rotate-left"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN PREVIEW AREA -->
+    <div id="preview-area">
+        <button id="open-config-btn" onclick="toggleConfig()" class="bg-white p-3 rounded-full shadow-2xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-all flex items-center gap-2 pr-4 group">
+            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-sliders text-sm"></i></div>
+            <span class="text-xs font-bold text-slate-700">Open Editor</span>
+        </button>
+
+        <div class="viewport-container">
+            <div class="iphone-frame" id="iphone-frame">
+                <div class="notch"></div>
+                <div class="status-bar"><span id="current-time">9:41</span><div class="flex gap-1.5"><i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-full"></i></div></div>
+                
+                <div class="absolute top-0 left-0 right-0 h-[88px] bg-white/95 backdrop-blur-md border-b border-slate-200 z-30 flex flex-col justify-end pb-2 px-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <div id="header-logo" class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs">CH</div>
+                            <div class="flex flex-col">
+                                <span id="header-name" class="text-[16px] font-bold text-slate-800 leading-tight">Central Hospital</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-container" id="chat-feed"></div>
+                
+                <div id="typing-container" class="px-4 mb-2 hidden">
+                    <div class="flex gap-1 bg-[#E9E9EB] w-fit px-3 py-2 rounded-2xl">
+                        <div class="dot w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                        <div class="dot w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                        <div class="dot w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                    </div>
+                </div>
+                
+                <div class="ios-input-container">
+                    <div class="ios-bar">
+                        <i id="camera-trigger" onclick="triggerPatientResponse()" class="fa-solid fa-camera ios-icon"></i>
+                        <div class="ios-field">
+                            <span id="ios-text-placeholder" class="text-slate-300">iMessage</span>
+                            <span id="ios-actual-text" class="hidden"></span>
+                        </div>
+                        <div id="ios-send-btn" class="ios-send-btn">
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="home-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Updated defaults to Central Hospital
+        const DEFAULT_HOSPITAL = "Central Hospital";
+        const DEFAULT_SCRIPT = [
+            { 
+                step: 0, 
+                bot: ["Hello, this is {hospital}. Are we speaking with the patient?"], 
+                choices: [{ text: "Yes", next: 1 }, { text: "No", next: 1 }] 
+            }, 
+            { 
+                step: 1, 
+                bot: ["Great. Goodbye!"], 
+                choices: [] 
+            }
+        ];
+        
+        let scriptState = JSON.parse(localStorage.getItem('demo_script')) || DEFAULT_SCRIPT;
+        let hospNameState = localStorage.getItem('demo_hosp_name') || DEFAULT_HOSPITAL;
+        let currentChoices = [];
+        let isProcessing = false;
+
+        function renderEditor() {
+            const list = document.getElementById('form-steps-list');
+            list.innerHTML = '';
+            document.getElementById('hosp-name-input').value = hospNameState;
+            scriptState.forEach((step, sIdx) => {
+                const card = document.createElement('div');
+                card.className = 'step-card';
+                card.innerHTML = `
+                    <div class="step-header"><span class="text-xs font-black text-slate-400">Step ${step.step}</span><button onclick="removeStep(${sIdx})" class="text-slate-300 hover:text-red-500">×</button></div>
+                    <div class="input-group"><label class="input-label flex justify-between">Bot Messages <button onclick="addBotMsg(${sIdx})" class="text-blue-500 text-[10px]">Add</button></label>
+                    ${step.bot.map((m, mIdx) => `<div class="flex gap-1 mb-1"><textarea oninput="updateBotMsg(${sIdx},${mIdx},this.value)" class="w-full text-xs p-2 border rounded resize-none h-12">${m}</textarea></div>`).join('')}</div>
+                    <div class="input-group"><label class="input-label flex justify-between">Choices <button onclick="addUserChoice(${sIdx})" class="text-blue-500 text-[10px]">Add</button></label>
+                    ${step.choices.map((c, cIdx) => `<div class="bg-slate-50 p-2 rounded mb-1 border"><input type="text" value="${c.text}" oninput="updateChoiceText(${sIdx},${cIdx},this.value)" class="w-full text-xs p-1 mb-1 border rounded"><div class="flex items-center gap-2"><span class="text-[9px] uppercase font-bold text-slate-400">Next:</span>
+                    <select onchange="updateChoiceNext(${sIdx},${cIdx},this.value)" class="flex-1 text-[10px] p-1 border rounded">${scriptState.map(s => `<option value="${s.step}" ${s.step === c.next ? 'selected' : ''}>Step ${s.step}</option>`).join('')}</select></div></div>`).join('')}</div>`;
+                list.appendChild(card);
+            });
+        }
+
+        function importFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                const newScript = [];
+                const map = {};
+                rows.forEach(r => {
+                    const find = (arr) => {
+                        const keys = Object.keys(r);
+                        const match = keys.find(k => arr.includes(k.toLowerCase().trim().replace(/\s+/g, '')));
+                        return match ? r[match] : undefined;
+                    };
+                    const sId = parseInt(find(['step', 'stepid', 'id']));
+                    if (isNaN(sId)) return;
+                    if (!map[sId]) { map[sId] = { step: sId, bot: [], choices: [] }; newScript.push(map[sId]); }
+                    const msg = find(['botmessage', 'message', 'text']);
+                    if (msg && !map[sId].bot.includes(msg.toString())) map[sId].bot.push(msg.toString());
+                    const cText = find(['choicetext', 'button', 'response']);
+                    const cNext = parseInt(find(['choicenext', 'nextstep', 'target']));
+                    if (cText && !isNaN(cNext)) map[sId].choices.push({ text: cText.toString(), next: cNext });
+                });
+                if (newScript.length) { scriptState = newScript.sort((a,b) => a.step - b.step); applyAndRestart(); }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function updateHeaderBranding() {
+            const name = hospNameState || "Hospital";
+            const hName = document.getElementById('header-name');
+            const hLogo = document.getElementById('header-logo');
+            if (hName) hName.innerText = name;
+            if (hLogo) {
+                const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                hLogo.innerText = initials;
+            }
+        }
+
+        function applyAndRestart() {
+            localStorage.setItem('demo_script', JSON.stringify(scriptState));
+            localStorage.setItem('demo_hosp_name', hospNameState);
+            updateHeaderBranding();
+            document.getElementById('chat-feed').innerHTML = '';
+            renderEditor(); 
+            runStep(0);
+        }
+
+        async function runStep(id) {
+            const data = scriptState.find(s => s.step === id);
+            if (!data) return;
+            isProcessing = true;
+            document.getElementById('camera-trigger').classList.remove('ios-icon-ready');
+            for (let msg of data.bot) { 
+                await showTyping(); 
+                addBubble(msg.replace(/{hospital}/g, hospNameState), 'bot'); 
+                await wait(600); 
+            }
+            currentChoices = data.choices || [];
+            if (currentChoices.length > 0) {
+                document.getElementById('camera-trigger').classList.add('ios-icon-ready');
+            }
+            isProcessing = false;
+        }
+
+        async function triggerPatientResponse() {
+            if (isProcessing || currentChoices.length === 0) return;
+            const choice = currentChoices[0];
+            currentChoices = [];
+            document.getElementById('camera-trigger').classList.remove('ios-icon-ready');
+            await simulateUserTyping(choice.text);
+            runStep(choice.next);
+        }
+
+        async function simulateUserTyping(text) {
+            const field = document.getElementById('ios-actual-text');
+            const place = document.getElementById('ios-text-placeholder');
+            const send = document.getElementById('ios-send-btn');
+            place.classList.add('hidden'); 
+            field.classList.remove('hidden'); 
+            field.textContent = ''; 
+            send.classList.add('active');
+            for (let char of text) { 
+                field.textContent += char; 
+                await wait(25 + Math.random() * 20); 
+            }
+            await wait(400); 
+            field.textContent = ''; 
+            field.classList.add('hidden');
+            place.classList.remove('hidden'); 
+            send.classList.remove('active');
+            addBubble(text, 'user');
+        }
+
+        function addBubble(text, type) {
+            const div = document.createElement('div');
+            div.className = `bubble bubble-${type}`; div.innerText = text;
+            document.getElementById('chat-feed').appendChild(div);
+            scrollToBottom();
+        }
+
+        async function showTyping() {
+            const tc = document.getElementById('typing-container');
+            tc.classList.remove('hidden'); scrollToBottom();
+            await wait(1200); tc.classList.add('hidden');
+        }
+
+        function updateHospName(v) { hospNameState = v; }
+        function addBotMsg(i) { scriptState[i].bot.push("Msg..."); renderEditor(); }
+        function removeBotMsg(i, j) { scriptState[i].bot.splice(j, 1); renderEditor(); }
+        function updateBotMsg(i, j, v) { scriptState[i].bot[j] = v; }
+        function addUserChoice(i) { scriptState[i].choices.push({ text: "Option", next: 0 }); renderEditor(); }
+        function updateChoiceText(i, j, v) { scriptState[i].choices[j].text = v; }
+        function updateChoiceNext(i, j, v) { scriptState[i].choices[j].next = parseInt(v); }
+        function removeStep(i) { scriptState.splice(i, 1); renderEditor(); }
+        function resetDefaults() { scriptState = [...DEFAULT_SCRIPT]; hospNameState = DEFAULT_HOSPITAL; applyAndRestart(); }
+        function toggleConfig() { document.body.classList.toggle('sidebar-hidden'); setTimeout(updateScale, 305); }
+        function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+        function scrollToBottom() { const f = document.getElementById('chat-feed'); f.scrollTop = f.scrollHeight; }
+        function downloadTemplate() {
+            const csv = "Step ID,Bot Message,Choice Text,Choice Next\n0,\"Hello.\",\"Yes\",1\n1,\"Goodbye.\",,";
+            const b = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'template.csv'; a.click();
+        }
+        function updateScale() {
+            const f = document.getElementById('iphone-frame');
+            if (f) f.style.transform = `scale(${Math.min(window.innerWidth / 460, window.innerHeight / 880, 1)})`;
+        }
+        function updateClock() {
+            const n = new Date();
+            const el = document.getElementById('current-time');
+            if (el) el.innerText = n.getHours() + ":" + n.getMinutes().toString().padStart(2, '0');
+        }
+
+        window.onload = () => { 
+            renderEditor(); 
+            updateHeaderBranding(); 
+            updateScale(); 
+            updateClock(); 
+            runStep(0); 
+        };
+        window.onresize = updateScale;
+    </script>
+</body>
+</html>
