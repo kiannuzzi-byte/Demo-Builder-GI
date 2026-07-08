@@ -497,26 +497,35 @@
             messages: [
                 "Good morning, {patient}. Starting today, please switch to a low-fiber (low-residue) diet. This helps your prep work as well as possible.",
                 "OK to eat: white bread, white rice, plain pasta, eggs, well-cooked skinless chicken or fish, broth, yogurt, and cheese. Please avoid: nuts, seeds, popcorn, whole grains, raw or high-fiber vegetables, beans, and fruit with skins.",
-                "Here is a printable low-fiber food list you can keep handy: https://vmfh.org/gi/low-fiber-diet. By now your prep kit should be in hand. If not, please pick it up today."
+                "Here is a printable low-fiber food list you can keep handy: https://vmfh.org/gi/low-fiber-diet. By now your prep kit should be in hand. If not, please pick it up today.",
+                "Before we move on, does the diet plan make sense, or do you have any questions about what you can eat?"
             ],
-            choices: []
+            choices: [
+                { text: "Got it. Quick question, are scrambled eggs okay for breakfast", ack: "Yes, {patient}, scrambled eggs are a great low-fiber choice. It sounds like you have the hang of it, nice work. Reply anytime if another question comes up." }
+            ]
         },
         {
             id: 4, dayOffset: -2, time: "9:00 AM", label: "Stock up on clear liquids",
             messages: [
                 "Hi {patient}, two days to go. Time to stock up on clear liquids for the day before your procedure.",
                 "Clear means anything you can see through: water, apple or white-grape juice, clear broth, black coffee or tea without milk, Sprite or 7-Up, plain Jell-O, and light-colored Gatorade or Powerade.",
-                "Please avoid anything red or purple, since the dye can look like blood during your exam. Full list of approved clear liquids: https://vmfh.org/gi/clear-liquids"
+                "Please avoid anything red or purple, since the dye can look like blood during your exam. Full list of approved clear liquids: https://vmfh.org/gi/clear-liquids",
+                "Any questions about what counts as a clear liquid? Just reply and let us know."
             ],
-            choices: []
+            choices: [
+                { text: "Is black coffee with no milk okay", ack: "Yes, black coffee with no milk is a clear liquid, so enjoy it. A good rule of thumb: if you can see through it and it isn't red or purple, it's fine." }
+            ]
         },
         {
             id: 5, dayOffset: -1, time: "8:00 AM", label: "Day before — clear liquids only",
             messages: [
                 "Good morning, {patient}. Today is prep day. From now until after your procedure, please have clear liquids only and no solid food.",
-                "Keep sipping fluids throughout the day so you stay hydrated and comfortable. We'll remind you this evening when it's time to start your prep."
+                "Keep sipping fluids throughout the day so you stay hydrated and comfortable. We'll remind you this evening when it's time to start your prep.",
+                "How are you feeling about starting your prep tonight? Do you understand the timing, or would you like to speak with a care team member?"
             ],
-            choices: []
+            choices: [
+                { text: "I understand it, but I'd feel better talking through the timing with someone", escalate: true, ack: "Of course, {patient}. A care team member will give you a call shortly to walk through the timing with you so you feel completely confident. Please keep your phone nearby." }
+            ]
         },
         {
             id: 6, dayOffset: -1, time: "5:00 PM", label: "Start first prep dose",
@@ -533,9 +542,12 @@
             id: 7, dayOffset: 0, time: "3:00 AM", label: "Second (split) dose",
             messages: [
                 "Good very early morning, {patient}. It's time for the second dose of your prep now, about 5 hours before you arrive. This split-dose timing gives the cleanest results.",
-                "Mix and drink it just like last night, and keep sipping clear fluids for now."
+                "Mix and drink it just like last night, and keep sipping clear fluids for now.",
+                "Reply here once you've finished this dose so we know you're on track."
             ],
-            choices: []
+            choices: [
+                { text: "All done, sipping water now", ack: "Perfect, {patient}, you're right on schedule. We'll check in once more before you head in." }
+            ]
         },
         {
             id: 8, dayOffset: 0, time: "5:30 AM", label: "NPO cutoff",
@@ -589,7 +601,7 @@
 
     /* ---------------- State ---------------- */
     // Bump when the default script changes so returning browsers refresh their cached copy.
-    const SCRIPT_VERSION = 3;
+    const SCRIPT_VERSION = 4;
     let touchpoints = load('gi_touchpoints', DEFAULT_TOUCHPOINTS);
     if (load('gi_script_version', 1) !== SCRIPT_VERSION) {
         touchpoints = JSON.parse(JSON.stringify(DEFAULT_TOUCHPOINTS));
