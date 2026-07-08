@@ -501,7 +501,7 @@
                 "Before we move on, does the diet plan make sense, or do you have any questions about what you can eat?"
             ],
             choices: [
-                { text: "Got it. Quick question, are scrambled eggs okay for breakfast", ack: "Yes, {patient}, scrambled eggs are a great low-fiber choice. It sounds like you have the hang of it, nice work. Reply anytime if another question comes up." }
+                { text: "Got it, are eggs okay to eat", ack: "Great question, {patient}. For anything about what you can eat, here is your approved low-fiber food list so you can check any item: https://vmfh.org/gi/low-fiber-diet" }
             ]
         },
         {
@@ -513,7 +513,7 @@
                 "Any questions about what counts as a clear liquid? Just reply and let us know."
             ],
             choices: [
-                { text: "Is black coffee with no milk okay", ack: "Yes, black coffee with no milk is a clear liquid, so enjoy it. A good rule of thumb: if you can see through it and it isn't red or purple, it's fine." }
+                { text: "Is black coffee with no milk okay", ack: "Good question, {patient}. You can check any drink against your approved clear-liquids list here: https://vmfh.org/gi/clear-liquids" }
             ]
         },
         {
@@ -601,7 +601,7 @@
 
     /* ---------------- State ---------------- */
     // Bump when the default script changes so returning browsers refresh their cached copy.
-    const SCRIPT_VERSION = 4;
+    const SCRIPT_VERSION = 5;
     let touchpoints = load('gi_touchpoints', DEFAULT_TOUCHPOINTS);
     if (load('gi_script_version', 1) !== SCRIPT_VERSION) {
         touchpoints = JSON.parse(JSON.stringify(DEFAULT_TOUCHPOINTS));
