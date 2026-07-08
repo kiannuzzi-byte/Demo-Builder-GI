@@ -478,7 +478,7 @@
                 "First, a quick medication check so we can keep you safe. Do you take any of the following: GLP-1 or weight-loss medications (Ozempic, Wegovy, Mounjaro, Zepbound), blood thinners (warfarin, Eliquis, Plavix), or iron supplements? Full list of medications to review: https://vmfh.org/gi/medication-holds"
             ],
             choices: [
-                { text: "Yes, I take Ozempic once a week.", escalate: true, ack: "Thank you for letting us know, {patient}. Because medications like Ozempic need to be paused before your procedure, a nurse from our care team will follow up with you shortly with personalized instructions. Please do not stop any medication until you hear from us." }
+                { text: "Yes, I take Ozempic once a week", escalate: true, ack: "Thank you for letting us know, {patient}. Because medications like Ozempic need to be paused before your procedure, a nurse from our care team will follow up with you shortly with personalized instructions. Please do not stop any medication until you hear from us." }
             ]
         },
         {
@@ -489,7 +489,7 @@
                 "3) Because you'll be sedated, an adult must drive you home and stay with you afterward. You cannot drive, take a bus, or rideshare alone. Do you have a ride arranged?"
             ],
             choices: [
-                { text: "Yes, my daughter is driving me and staying with me.", ack: "That's perfect, {patient}. You're all set on that front. We'll check in again in a few days as your prep gets started." }
+                { text: "Yes, my daughter is driving me and staying with me", ack: "That's perfect, {patient}. You're all set on that front. We'll check in again in a few days as your prep gets started." }
             ]
         },
         {
@@ -526,7 +526,7 @@
                 "How is it going with the prep this evening?"
             ],
             choices: [
-                { text: "Started it. It's a lot to drink but I'm getting it down.", ack: "You're doing great, {patient}. That is completely normal. Keep sipping clear fluids, and we'll text you early tomorrow morning when it's time for the second dose." }
+                { text: "Started it, it's a lot to drink but I'm getting it down", ack: "You're doing great, {patient}. That is completely normal. Keep sipping clear fluids, and we'll text you early tomorrow morning when it's time for the second dose." }
             ]
         },
         {
@@ -552,7 +552,7 @@
                 "Your last few bowel movements should now look like clear or light-yellow liquid with no solid pieces. Does yours look clear? Here is a quick visual guide: https://vmfh.org/gi/prep-clear-check"
             ],
             choices: [
-                { text: "Not quite, it's still a little cloudy with some bits.", escalate: true, ack: "Thank you for checking, {patient}. Please hold off on heading in for now. A nurse from our care team will call you shortly to guide you through the next steps so we can keep your procedure on track. Please keep your phone close." }
+                { text: "Not quite, it's still a little cloudy with some bits", escalate: true, ack: "Thank you for checking, {patient}. Please hold off on heading in for now. A nurse from our care team will call you shortly to guide you through the next steps so we can keep your procedure on track. Please keep your phone close." }
             ]
         },
         {
@@ -571,7 +571,7 @@
                 "Please call us or seek care if you have heavy rectal bleeding, severe or worsening belly pain, a fever over 100.4 degrees, or dizziness. How are you feeling right now?"
             ],
             choices: [
-                { text: "A little groggy but feeling okay overall.", ack: "That's exactly what we would expect, {patient}. Take it easy for the rest of the day and have someone stay with you tonight. We'll send one last check-in tomorrow." }
+                { text: "A little groggy but feeling okay overall", ack: "That's exactly what we would expect, {patient}. Take it easy for the rest of the day and have someone stay with you tonight. We'll send one last check-in tomorrow." }
             ]
         },
         {
@@ -582,14 +582,14 @@
                 "One last thing: on a scale of 1 to 5, how was your prep experience with us? Your feedback helps us care better for every patient."
             ],
             choices: [
-                { text: "Definitely a 5. The reminders kept me on track the whole time.", ack: "Thank you so much, {patient}. That means a lot to our team, and we're so glad the reminders helped. Take good care." }
+                { text: "Definitely a 5, the reminders kept me on track the whole time", ack: "Thank you so much, {patient}. That means a lot to our team, and we're so glad the reminders helped. Take good care." }
             ]
         }
     ];
 
     /* ---------------- State ---------------- */
     // Bump when the default script changes so returning browsers refresh their cached copy.
-    const SCRIPT_VERSION = 2;
+    const SCRIPT_VERSION = 3;
     let touchpoints = load('gi_touchpoints', DEFAULT_TOUCHPOINTS);
     if (load('gi_script_version', 1) !== SCRIPT_VERSION) {
         touchpoints = JSON.parse(JSON.stringify(DEFAULT_TOUCHPOINTS));
