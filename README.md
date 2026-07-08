@@ -20,9 +20,9 @@ It models the real workflow a GI clinic runs over a split-dose bowel prep:
 - **Day 0** — Hour-by-hour: second split dose (3 AM), NPO cutoff (5:30 AM), the **clear-liquid stool check** (6:30 AM), and arrival instructions (7:15 AM)
 - **Post-procedure** — Same-day recovery check-in and a next-day feedback prompt
 
-The **6:30 AM clear-liquid stool check** is the marquee moment: a patient answering *"No, still cloudy"* or *"Not sure"* triggers a nurse callback — the kind of automated triage that prevents same-day turn-aways.
+The **6:30 AM clear-liquid stool check** is the marquee moment: a patient replying that their prep is *"still a little cloudy"* prompts a nurse callback — the kind of automated triage that prevents same-day turn-aways.
 
-> **Patient-side only.** The automated messages never give clinical advice. When a patient reports something concerning, the thread simply **acknowledges the concern and promises a human callback** ("A nurse from our care team will reach out shortly"), and shows a small **"Care team notified"** chip. There is no separate care-team dashboard — this is what the *patient* sees.
+> **Patient-side only, natural free-text replies.** The patient responds by *typing* a natural-language message (conversational AI style) — there are no multiple-choice buttons. The automated messages never give clinical advice. When a concern truly needs a human, the reply says so ("A nurse from our care team will follow up with you shortly"); routine responses simply get a normal reply. There is no "care team notified" banner and no separate care-team dashboard — this is exactly what the *patient* sees.
 
 ---
 
@@ -42,14 +42,10 @@ The left panel has three tabs plus a persistent presenter control bar at the bot
 A vertical **Care Journey** navigator listing every touchpoint (e.g. *Day -14 · Welcome*, *Day 0 · 6:30 AM · Clear-liquid check*). Touchpoints that trigger a nurse callback are flagged with a ⚠︎.
 
 - **Click any touchpoint** to jump the thread straight there (it reveals everything up to and including that point). Great for hopping to the highlight moments.
-- **Advance** (bottom bar, or the pulsing **camera icon** in the phone's message bar) steps through naturally: it reveals the next patient reply, then the next set of hospital messages.
+- **Advance** (bottom bar, or the pulsing **camera icon** in the phone's message bar) drives everything: tap it to reveal a touchpoint's hospital messages, tap again to have the patient *type out* their scripted reply, then again to move to the next touchpoint.
 
-### 2. Live reply branches
-When a touchpoint offers reply choices, they appear as tappable **blue quick-reply chips** in the thread. Tap the specific one you want to demo:
-- A benign reply (e.g. *"Yes, all clear ✅"*) gets a warm confirmation.
-- A **concerning reply** (amber chip) gets an acknowledgment bubble + the **"Care team notified"** chip.
-
-Tapping **Advance** instead of a chip picks the default (first) reply automatically, so you can keep a steady rhythm.
+### 2. Scripted patient replies (typed live)
+The conversation path is fully pre-scripted, so nothing is left to chance in the room. When a touchpoint expects a patient response, the camera icon pulses; tap it and the patient's reply **types out** in the message bar and sends — just like a real person texting back. Touchpoints that trigger a nurse callback are flagged with a ⚠︎ in the navigator (a presenter cue only; the patient never sees it).
 
 ### 3. Present mode
 Click the **expand** button (or the panel's chevron) to hide the sidebar and show the phone full, clean, and centered for the room. A small "Show Panel" button brings the controls back.
@@ -75,10 +71,10 @@ A lightweight editor to tweak message copy, reply choices, escalation flags, and
 
 ## Suggested live demo flow (~3 minutes)
 
-1. Open on **Day -14** — show the warm welcome + the medication-review question. Tap **"Yes — GLP-1 / weight-loss med"** to show the escalation + *Care team notified* chip.
-2. Jump to **Day -1 · 5:00 PM** — tap **"It's making me nauseous"** to show empathetic escalation during prep.
-3. Jump to **Day 0 · 6:30 AM · Clear-liquid check** — this is the headline. Tap **"No, still cloudy or has solid pieces"** to show the same-day nurse callback that prevents a wasted procedure slot.
-4. Jump to **Post-procedure** — show the recovery check-in and the 1-tap satisfaction prompt.
+1. Open on **Day -14** — show the warm welcome + the medication-review question, then Advance so the patient types *"Yes, I take Ozempic once a week."* The reply promises a nurse follow-up — the GLP-1 catch that prevents day-of turn-aways.
+2. Jump through **Day -7 → Day -1** — show the escalating cadence (prep kit + ride, low-fiber diet, clear liquids, first prep dose), including the tappable education links pushed at each stage.
+3. Jump to **Day 0 · 6:30 AM · Clear-liquid check** — the headline. Advance so the patient types *"Not quite, it's still a little cloudy with some bits."* The message holds them from coming in and promises an immediate nurse call — the same-day save.
+4. Continue to **Arrival → Recovery → Next-day feedback** — show the up-to-the-hour hand-holding and post-procedure follow-up.
 5. Hit **Present mode** at any point to show the clean phone to the room.
 
 ---

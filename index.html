@@ -236,48 +236,9 @@
             animation: fadeIn 0.3s ease;
         }
 
-        /* ---- Choice chips (quick replies) ---- */
-        .choice-chips {
-            align-self: flex-end;
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            align-items: flex-end;
-            margin: 8px 0 4px;
-            max-width: 82%;
-        }
-        .choice-chip {
-            background: #fff;
-            border: 1.5px solid var(--ios-blue);
-            color: var(--ios-blue);
-            border-radius: 18px;
-            padding: 7px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.15s;
-            text-align: right;
-            font-weight: 500;
-        }
-        .choice-chip:hover { background: var(--ios-blue); color: #fff; transform: translateY(-1px); }
-        .choice-chip.escalate { border-color: #E0A800; color: #B37F00; }
-        .choice-chip.escalate:hover { background: #E0A800; color: #fff; }
-
-        /* ---- Care team notified chip ---- */
-        .care-chip {
-            align-self: center;
-            background: #FFF7E6;
-            border: 1px solid #FBE3A6;
-            color: #8A6D00;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 13px;
-            margin: 6px 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            animation: popIn 0.25s ease-out forwards;
-        }
+        /* ---- Tappable links inside SMS bubbles ---- */
+        .bubble-bot .sms-link { color: #0a84ff; text-decoration: underline; }
+        .bubble-user .sms-link { color: #fff; text-decoration: underline; }
 
         .ios-input-container {
             background: white;
@@ -501,78 +462,77 @@
         proctime: "8:00 AM"
     };
 
-    /* ---- Full preloaded CommonSpirit GI split-dose colonoscopy prep script ---- */
+    /* ---- Full preloaded CommonSpirit GI split-dose colonoscopy prep script ----
+       Linear path: each touchpoint may carry a single pre-scripted patient reply
+       that types out when the presenter taps the camera / Advance.
+       - reply.ack = the hospital's follow-up message (optional)
+       - reply.escalate = true only flags the care team internally (presenter cue in the
+         navigator). Follow-up language lives in the ack copy ONLY when a human callback
+         is actually warranted. No "care team notified" banner is shown to the patient. */
     const DEFAULT_TOUCHPOINTS = [
         {
             id: 1, dayOffset: -14, time: "9:00 AM", label: "Welcome & medication review",
             messages: [
-                "Hi {patient}, this is the care team at {hospital}. 👋 Over the next two weeks we'll send a few friendly reminders to help you get ready for your colonoscopy on {procdate} at {proctime}.",
-                "Your procedure is at {location}. Msg rates may apply — reply STOP to opt out anytime.",
-                "First, a quick medication check so we can keep you safe. Do you take any of these? \n• GLP-1 / weight-loss meds (Ozempic, Wegovy, Mounjaro, Zepbound) \n• Blood thinners (warfarin, Eliquis, Plavix) \n• Iron supplements"
+                "Hi {patient}, this is the care team at {hospital}. Over the next two weeks we'll send a few reminders to help you get ready for your colonoscopy on {procdate} at {proctime}.",
+                "Your procedure will be at {location}. Message and data rates may apply. Reply STOP to opt out at any time.",
+                "First, a quick medication check so we can keep you safe. Do you take any of the following: GLP-1 or weight-loss medications (Ozempic, Wegovy, Mounjaro, Zepbound), blood thinners (warfarin, Eliquis, Plavix), or iron supplements? Full list of medications to review: https://vmfh.org/gi/medication-holds"
             ],
             choices: [
-                { text: "Yes — GLP-1 / weight-loss med", next: 2, escalate: true, ack: "Thanks for letting us know, {patient}. A nurse from our care team will call you about safely pausing that (usually about a week before your procedure). Please don't stop any medication until we talk. 💙" },
-                { text: "Yes — a blood thinner", next: 2, escalate: true, ack: "Got it, {patient}. Because blood thinners need special timing, a nurse will reach out with personalized instructions. Please keep taking it as prescribed until we speak." },
-                { text: "No, none of those", next: 2, ack: "Perfect — thanks, {patient}! We'll check in again next week. 😊" },
-                { text: "I'm not sure", next: 2, escalate: true, ack: "No problem at all. A nurse will give you a quick call to review your medication list together so nothing is missed." }
+                { text: "Yes, I take Ozempic once a week.", escalate: true, ack: "Thank you for letting us know, {patient}. Because medications like Ozempic need to be paused before your procedure, a nurse from our care team will follow up with you shortly with personalized instructions. Please do not stop any medication until you hear from us." }
             ]
         },
         {
-            id: 2, dayOffset: -7, time: "10:00 AM", label: "Prep kit, med holds & ride",
+            id: 2, dayOffset: -7, time: "10:00 AM", label: "Prep kit, medication holds & ride",
             messages: [
-                "Hi {patient}! One week to go until your colonoscopy on {procdate}. 🗓️ A few important to-dos this week:",
-                "1) Pick up your bowel-prep kit from the pharmacy now if you haven't — you'll need it in a few days. \n2) If a nurse advised pausing a GLP-1 or blood thinner, this is the week to follow those instructions.",
-                "3) Because you'll be sedated, an adult must drive you home and stay with you afterward — you can't drive, bus, or rideshare alone. Do you have a ride arranged?"
+                "Hi {patient}, one week until your colonoscopy on {procdate}. A few important to-dos this week.",
+                "1) Pick up your bowel-prep kit from the pharmacy now if you haven't yet. 2) If a nurse asked you to pause a medication, this is the week to follow those instructions. Here is a quick overview of what to expect: https://vmfh.org/gi/colonoscopy-prep",
+                "3) Because you'll be sedated, an adult must drive you home and stay with you afterward. You cannot drive, take a bus, or rideshare alone. Do you have a ride arranged?"
             ],
             choices: [
-                { text: "Ride is arranged ✅", next: 3, ack: "Wonderful — you're all set on that front, {patient}!" },
-                { text: "I don't have a ride yet", next: 3, escalate: true, ack: "Thanks for the heads-up. A care team member will reach out to help you arrange a ride so your procedure can go ahead as planned." },
-                { text: "Haven't picked up my prep yet", next: 3, escalate: true, ack: "No worries — please grab it in the next day or two. A nurse will follow up to make sure you have everything you need in time." }
+                { text: "Yes, my daughter is driving me and staying with me.", ack: "That's perfect, {patient}. You're all set on that front. We'll check in again in a few days as your prep gets started." }
             ]
         },
         {
             id: 3, dayOffset: -3, time: "9:00 AM", label: "Low-fiber diet begins",
             messages: [
-                "Good morning, {patient}! Starting today, please switch to a low-fiber (low-residue) diet. This helps your prep work better. 🍚",
-                "✅ OK to eat: white bread, white rice, plain pasta, eggs, well-cooked skinless chicken or fish, broth, yogurt, cheese. \n🚫 Avoid: nuts, seeds, popcorn, whole grains, raw or high-fiber veggies, beans, and fruit with skins.",
-                "By now your bowel-prep kit should be in hand. If it's not, please pick it up today so you're ready. You've got this! 💪"
+                "Good morning, {patient}. Starting today, please switch to a low-fiber (low-residue) diet. This helps your prep work as well as possible.",
+                "OK to eat: white bread, white rice, plain pasta, eggs, well-cooked skinless chicken or fish, broth, yogurt, and cheese. Please avoid: nuts, seeds, popcorn, whole grains, raw or high-fiber vegetables, beans, and fruit with skins.",
+                "Here is a printable low-fiber food list you can keep handy: https://vmfh.org/gi/low-fiber-diet. By now your prep kit should be in hand. If not, please pick it up today."
             ],
             choices: []
         },
         {
             id: 4, dayOffset: -2, time: "9:00 AM", label: "Stock up on clear liquids",
             messages: [
-                "Hi {patient} — two days to go. Time to stock up on CLEAR liquids for tomorrow. 🥤",
-                "✅ Clear = anything you can see through: water, apple or white-grape juice, clear broth, black coffee or tea (no milk), Sprite/7-Up, plain Jell-O, and light-colored Gatorade/Powerade.",
-                "🚫 Please avoid anything RED or PURPLE — the dye can look like blood during your exam. Staying well hydrated now makes tomorrow's prep much easier."
+                "Hi {patient}, two days to go. Time to stock up on clear liquids for the day before your procedure.",
+                "Clear means anything you can see through: water, apple or white-grape juice, clear broth, black coffee or tea without milk, Sprite or 7-Up, plain Jell-O, and light-colored Gatorade or Powerade.",
+                "Please avoid anything red or purple, since the dye can look like blood during your exam. Full list of approved clear liquids: https://vmfh.org/gi/clear-liquids"
             ],
             choices: []
         },
         {
             id: 5, dayOffset: -1, time: "8:00 AM", label: "Day before — clear liquids only",
             messages: [
-                "Good morning, {patient}! Today is prep day. From now until after your procedure: CLEAR LIQUIDS ONLY — no solid food. 🚫🍽️",
-                "Keep sipping fluids throughout the day so you stay hydrated and comfortable. We'll remind you when it's time to start your prep this evening."
+                "Good morning, {patient}. Today is prep day. From now until after your procedure, please have clear liquids only and no solid food.",
+                "Keep sipping fluids throughout the day so you stay hydrated and comfortable. We'll remind you this evening when it's time to start your prep."
             ],
             choices: []
         },
         {
             id: 6, dayOffset: -1, time: "5:00 PM", label: "Start first prep dose",
             messages: [
-                "It's time, {patient} — please start your FIRST dose of the bowel prep now (around 5–6 PM). Follow the exact mixing and timing on your kit's instructions.",
-                "What to expect: frequent, watery bowel movements within an hour or two. Stay near a bathroom, keep sipping clear fluids, and a little barrier cream can help with irritation. 💛",
-                "How's it going with the prep this evening?"
+                "It's time, {patient}. Please start the first dose of your bowel prep now. Follow the exact mixing and timing instructions on your kit.",
+                "What to expect: frequent, watery bowel movements within an hour or two. Stay near a bathroom and keep sipping clear fluids. Step-by-step prep instructions are here: https://vmfh.org/gi/prep-instructions",
+                "How is it going with the prep this evening?"
             ],
             choices: [
-                { text: "Started my prep 👍", next: 7, ack: "Great work, {patient}! Keep sipping those clear fluids. We'll text you early tomorrow for the second dose." },
-                { text: "It's making me nauseous / can't keep it down", next: 7, escalate: true, ack: "Thanks for telling us, {patient}. A nurse will reach out shortly to help you through it. Hang tight for their call — you're not alone." },
-                { text: "I accidentally ate solid food", next: 7, escalate: true, ack: "Thank you for being honest — this is important. A nurse will call you right away to advise on next steps for your prep." }
+                { text: "Started it. It's a lot to drink but I'm getting it down.", ack: "You're doing great, {patient}. That is completely normal. Keep sipping clear fluids, and we'll text you early tomorrow morning when it's time for the second dose." }
             ]
         },
         {
             id: 7, dayOffset: 0, time: "3:00 AM", label: "Second (split) dose",
             messages: [
-                "Good (very early) morning, {patient}. ⏰ It's time for your SECOND dose of prep now — about 5 hours before arrival. This split-dose timing gives the cleanest possible results.",
+                "Good very early morning, {patient}. It's time for the second dose of your prep now, about 5 hours before you arrive. This split-dose timing gives the cleanest results.",
                 "Mix and drink it just like last night, and keep sipping clear fluids for now."
             ],
             choices: []
@@ -580,59 +540,61 @@
         {
             id: 8, dayOffset: 0, time: "5:30 AM", label: "NPO cutoff",
             messages: [
-                "Heads up, {patient}: from this moment on, please have NOTHING to eat or drink — including water, gum, and mints. 🚫💧 This keeps you safe for anesthesia.",
-                "You're in the home stretch. See you in a few hours!"
+                "Important, {patient}: from this point on, please have nothing to eat or drink, including water, gum, and mints. This keeps you safe for anesthesia.",
+                "You're almost there. We'll see you in a few hours."
             ],
             choices: []
         },
         {
             id: 9, dayOffset: 0, time: "6:30 AM", label: "Clear-liquid stool check",
             messages: [
-                "Almost there, {patient}! One quick but very important check. ✅",
-                "Your last few bowel movements should now look like clear or light-yellow liquid, with no solid pieces. Does yours look clear?"
+                "Almost there, {patient}. One quick but important check before you head in.",
+                "Your last few bowel movements should now look like clear or light-yellow liquid with no solid pieces. Does yours look clear? Here is a quick visual guide: https://vmfh.org/gi/prep-clear-check"
             ],
             choices: [
-                { text: "Yes, all clear ✅", next: 10, ack: "Perfect — that's exactly what we want to see. You're ready! 🎉" },
-                { text: "No, still cloudy or has solid pieces", next: 10, escalate: true, ack: "Thanks for checking, {patient}. Please don't head in just yet — a nurse will call you right now to guide you so we don't have to reschedule. Keep your phone close. 📞" },
-                { text: "Not sure", next: 10, escalate: true, ack: "No problem — a nurse will call you in the next few minutes to review it with you so we get you fully ready. Please keep your phone handy." }
+                { text: "Not quite, it's still a little cloudy with some bits.", escalate: true, ack: "Thank you for checking, {patient}. Please hold off on heading in for now. A nurse from our care team will call you shortly to guide you through the next steps so we can keep your procedure on track. Please keep your phone close." }
             ]
         },
         {
             id: 10, dayOffset: 0, time: "7:15 AM", label: "Arrival & what to bring",
             messages: [
-                "Time to head to {location}, {patient}. 🚗 Please arrive by 7:15 AM for your {proctime} procedure.",
-                "Bring: photo ID, insurance card, and your medication list. Leave valuables at home, and make sure your ride/escort is with you. See you soon — you've done a great job getting ready! 💙"
+                "Thanks for working through that last step with our nurse, {patient}. You're all set. Time to head to {location} for your {proctime} procedure. Please arrive by 7:15 AM.",
+                "Please bring your photo ID, insurance card, and medication list, and leave valuables at home. Make sure your ride and escort are with you. Directions and parking: https://vmfh.org/locations/st-joseph"
             ],
             choices: []
         },
         {
             id: 11, dayOffset: 0, time: "2:00 PM", label: "Recovery check-in",
             messages: [
-                "Hi {patient}, your care team hopes your procedure went smoothly today. 💙 Rest up this afternoon.",
-                "You can start with light, easy foods once you feel ready, and keep drinking fluids. Some bloating or gas is normal for a bit. If a nurse asked you to pause any medications, you can usually resume them tomorrow unless told otherwise.",
-                "⚠️ Please call us or seek care for: heavy rectal bleeding, severe or worsening belly pain, a fever over 100.4°F, or dizziness/fainting. How are you feeling right now?"
+                "Hi {patient}, your care team hopes your procedure went smoothly today. Please rest up this afternoon.",
+                "You can start with light, easy foods once you feel ready, and keep drinking fluids. Some bloating or gas is normal for a little while. If a nurse asked you to pause any medications, you can usually resume them tomorrow unless you were told otherwise. After-care guide: https://vmfh.org/gi/after-your-colonoscopy",
+                "Please call us or seek care if you have heavy rectal bleeding, severe or worsening belly pain, a fever over 100.4 degrees, or dizziness. How are you feeling right now?"
             ],
             choices: [
-                { text: "Feeling fine 🙂", next: 12, ack: "So glad to hear it! Take it easy the rest of the day. We'll send one last check-in tomorrow. 😊" },
-                { text: "I have a question / not feeling well", next: 12, escalate: true, ack: "Thanks for letting us know, {patient}. A nurse will call you shortly to check in and answer your questions." }
+                { text: "A little groggy but feeling okay overall.", ack: "That's exactly what we would expect, {patient}. Take it easy for the rest of the day and have someone stay with you tonight. We'll send one last check-in tomorrow." }
             ]
         },
         {
             id: 12, dayOffset: 1, time: "10:00 AM", label: "Next-day check & feedback",
             messages: [
-                "Good morning, {patient}! One day after your colonoscopy — how are you doing today?",
-                "You should be back to your normal diet and routine. Your doctor's office will share your results and any follow-up timing. Held medications can typically be resumed now (call us if you're unsure).",
-                "Last thing — on a scale of 1–5, how was your prep experience with us? Your feedback helps us care better for every patient. 🙏"
+                "Good morning, {patient}. One day after your colonoscopy, how are you doing today?",
+                "You should be back to your normal diet and routine. Your doctor's office will share your results and any follow-up timing. Any medications you paused can usually be resumed now. If you're unsure, just call us.",
+                "One last thing: on a scale of 1 to 5, how was your prep experience with us? Your feedback helps us care better for every patient."
             ],
             choices: [
-                { text: "⭐️⭐️⭐️⭐️⭐️ Great", next: 12, ack: "Thank you so much, {patient}! It was our pleasure to care for you. Take good care. 💙" },
-                { text: "It could have been better", next: 12, escalate: true, ack: "We appreciate your honesty, {patient}. A care team member will reach out to hear more so we can improve. Thank you for trusting us." }
+                { text: "Definitely a 5. The reminders kept me on track the whole time.", ack: "Thank you so much, {patient}. That means a lot to our team, and we're so glad the reminders helped. Take good care." }
             ]
         }
     ];
 
     /* ---------------- State ---------------- */
+    // Bump when the default script changes so returning browsers refresh their cached copy.
+    const SCRIPT_VERSION = 2;
     let touchpoints = load('gi_touchpoints', DEFAULT_TOUCHPOINTS);
+    if (load('gi_script_version', 1) !== SCRIPT_VERSION) {
+        touchpoints = JSON.parse(JSON.stringify(DEFAULT_TOUCHPOINTS));
+        localStorage.setItem('gi_script_version', JSON.stringify(SCRIPT_VERSION));
+    }
     let settings = load('gi_settings', null) || {
         patient: DEFAULTS.patient,
         hospital: DEFAULTS.hospital,
@@ -654,6 +616,7 @@
     function save() {
         localStorage.setItem('gi_touchpoints', JSON.stringify(touchpoints));
         localStorage.setItem('gi_settings', JSON.stringify(settings));
+        localStorage.setItem('gi_script_version', JSON.stringify(SCRIPT_VERSION));
     }
     function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -730,38 +693,21 @@
         el.innerHTML = `<span class="dd-day">${fmtDivider(d)}</span><span class="dd-time">${tp.time}</span>`;
         feed().appendChild(el);
     }
+    // Escape HTML, then turn any URLs into tappable links (styled like real SMS links).
+    function renderText(raw) {
+        let safe = token(raw)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        safe = safe.replace(/(https?:\/\/[^\s]+)/g,
+            '<a href="$1" target="_blank" rel="noopener" class="sms-link">$1</a>');
+        return safe;
+    }
     function addBubble(text, type) {
         const div = document.createElement('div');
         div.className = `bubble bubble-${type}`;
-        div.innerText = token(text);
+        div.innerHTML = renderText(text);
         feed().appendChild(div);
         scrollToBottom();
         return div;
-    }
-    function addCareChip() {
-        const el = document.createElement('div');
-        el.className = 'care-chip';
-        el.innerHTML = `<i class="fa-solid fa-user-nurse"></i> Care team notified`;
-        feed().appendChild(el);
-        scrollToBottom();
-    }
-    function addChoiceChips(tp) {
-        const wrap = document.createElement('div');
-        wrap.className = 'choice-chips';
-        wrap.id = 'active-choices';
-        (tp.choices || []).forEach((c, idx) => {
-            const btn = document.createElement('div');
-            btn.className = `choice-chip ${c.escalate ? 'escalate' : ''}`;
-            btn.innerText = c.text;
-            btn.onclick = () => selectChoice(idx);
-            wrap.appendChild(btn);
-        });
-        feed().appendChild(wrap);
-        scrollToBottom();
-    }
-    function removeChips() {
-        const c = document.getElementById('active-choices');
-        if (c) c.remove();
     }
     function updateReceipt() {
         // remove existing receipts, add "Read" under the last outbound bubble
@@ -823,15 +769,15 @@
             await wait(450);
         }
         if ((tp.choices || []).length) {
+            // A pre-scripted patient reply is pending; it types out on the next Advance.
             awaitingReply = true;
-            addChoiceChips(tp);
         }
         isProcessing = false;
         updateCamera();
         renderNav();
     }
 
-    // Animated selection of a reply on the current touchpoint
+    // Type out the pre-scripted patient reply for the current touchpoint, then the ack.
     async function selectChoice(idx) {
         if (isProcessing || !awaitingReply) return;
         const tp = touchpoints[currentTp];
@@ -839,7 +785,6 @@
         if (!choice) return;
         isProcessing = true;
         awaitingReply = false;
-        removeChips();
         document.getElementById('camera-trigger').classList.remove('ios-icon-ready');
         await simulateUserTyping(choice.text);
         replied[currentTp] = idx;
@@ -849,7 +794,6 @@
             addBubble(choice.ack, 'bot');
             await wait(300);
         }
-        if (choice.escalate) { addCareChip(); await wait(200); }
         isProcessing = false;
         updateCamera();
         renderNav();
@@ -874,10 +818,9 @@
                     const c = tp.choices[replied[i]];
                     addBubble(c.text, 'user');
                     if (c.ack) addBubble(c.ack, 'bot');
-                    if (c.escalate) addCareChip();
                 } else if (i === target) {
+                    // Reply is pending; it will type out on the next Advance.
                     awaitingReply = true;
-                    addChoiceChips(tp);
                 }
             }
         }
@@ -972,13 +915,13 @@
                 <div class="mb-2"><label class="input-label">Label</label><input type="text" value="${escapeAttr(tp.label)}" oninput="updTp(${sIdx},'label',this.value)" class="txt-input"></div>
                 <label class="input-label flex justify-between items-center">Bot Messages <button onclick="addMsg(${sIdx})" class="text-blue-500 text-[10px] font-bold">+ Add</button></label>
                 ${tp.messages.map((m, mIdx) => `<div class="flex gap-1 mb-1 items-start"><textarea oninput="updMsg(${sIdx},${mIdx},this.value)" class="txt-input text-xs resize-none h-14">${escapeHtml(m)}</textarea><button onclick="delMsg(${sIdx},${mIdx})" class="text-slate-300 hover:text-red-500 px-1">×</button></div>`).join('')}
-                <label class="input-label flex justify-between items-center mt-2">Reply Choices <button onclick="addChoice(${sIdx})" class="text-blue-500 text-[10px] font-bold">+ Add</button></label>
+                <label class="input-label flex justify-between items-center mt-2">Scripted Patient Reply <button onclick="addChoice(${sIdx})" class="text-blue-500 text-[10px] font-bold">+ Add</button></label>
                 ${(tp.choices || []).map((c, cIdx) => `
                     <div class="bg-slate-50 p-2 rounded-lg mb-1.5 border border-slate-200">
                         <input type="text" value="${escapeAttr(c.text)}" oninput="updChoice(${sIdx},${cIdx},'text',this.value)" class="txt-input text-xs mb-1" placeholder="Choice text">
                         <textarea oninput="updChoice(${sIdx},${cIdx},'ack',this.value)" class="txt-input text-xs resize-none h-12 mb-1" placeholder="Ack (optional)">${escapeHtml(c.ack || '')}</textarea>
                         <label class="flex items-center gap-2 text-[11px] text-slate-600 font-semibold">
-                            <input type="checkbox" ${c.escalate ? 'checked' : ''} onchange="updChoice(${sIdx},${cIdx},'escalate',this.checked)"> ⚠︎ Escalate (notify care team)
+                            <input type="checkbox" ${c.escalate ? 'checked' : ''} onchange="updChoice(${sIdx},${cIdx},'escalate',this.checked)"> Flag care team (presenter cue only)
                             <button onclick="delChoice(${sIdx},${cIdx})" class="ml-auto text-slate-300 hover:text-red-500">remove</button>
                         </label>
                     </div>`).join('')}`;
