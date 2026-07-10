@@ -482,7 +482,7 @@
                 "First, a quick medication check so we can keep you safe. Do you take any of the following: GLP-1 or weight-loss medications (Ozempic, Wegovy, Mounjaro, Zepbound), blood thinners (warfarin, Eliquis, Plavix), or iron supplements? Full list of medications to review: https://vmfh.org/gi/medication-holds"
             ],
             choices: [
-                { text: "Yes, I take Ozempic once a week", escalate: true, ack: "Thank you for letting us know, {patient}. Because medications like Ozempic need to be paused before your procedure, a nurse from our care team will follow up with you shortly with personalized instructions. Please do not stop any medication until you hear from us." }
+                { text: "Yes, I take Ozempic once a week", escalate: true, ack: "Thank you for letting us know, {patient}. Because these types of medications often need to be paused before your procedure, a nurse from our care team will follow up with you shortly with personalized instructions. Please do not stop any medication until you hear from us." }
             ]
         },
         {
@@ -548,15 +548,14 @@
                Hours window -- not at an arbitrary "N hours before" for each patient.
                So the day-of is ONE consolidated early-morning send whose exact times
                (dose 2, NPO, arrival) are personalized per patient via playback fields. */
-            id: 7, dayOffset: 0, time: "4:00 AM", label: "Day of — dose 2, NPO & arrival",
+            id: 7, dayOffset: 0, time: "4:00 AM", label: "Day of — reminder, dose 2 & arrival",
             messages: [
-                "Good morning, {patient}. Today is your colonoscopy at {hospital}, and here is everything you need for this morning with your personal times.",
-                "1) Start your second (final) prep dose now, at {dose2}. Mix and drink it just like last night and keep sipping clear fluids. 2) Finish all clear liquids and then have nothing by mouth — including water, gum, and mints — after {npo}. This keeps you safe for anesthesia.",
-                "3) Plan to arrive at {location} by {arrival} for your {proctime} procedure. Bring your photo ID, insurance card, and medication list, and make sure your ride and escort are with you. Directions and parking: https://vmfh.org/locations/st-joseph",
-                "One last check: your prep is working when your bowel movements look like clear or light-yellow liquid with no solid pieces. If yours still look cloudy, or if anything doesn't feel right, reply here and a nurse will call you before you head in. Visual guide: https://vmfh.org/gi/prep-clear-check"
+                "Good morning, {patient}. Reminder: your colonoscopy is today at {proctime}, at {location}.",
+                "Start your second prep dose now, at {dose2}. Then nothing to eat or drink, including water, after {npo}.",
+                "Please arrive by {arrival} with your ID, insurance card, and a ride. Quick check: are your stools now clear or light-yellow liquid? If not, reply and a nurse will call before you come in."
             ],
             choices: [
-                { text: "Mine still looks a little cloudy with some bits", escalate: true, ack: "Thank you for checking, {patient}. Please hold off on heading in for now. A nurse from our care team will call you shortly to guide you through the next steps so we can keep your procedure on track. Please keep your phone close." }
+                { text: "Not quite, still a little cloudy", escalate: true, ack: "Thank you for checking, {patient}. Please hold off on heading in for now. A nurse from our care team will call you shortly to guide you through the next steps so we can keep your procedure on track. Please keep your phone close." }
             ]
         },
         {
@@ -574,7 +573,7 @@
 
     /* ---------------- State ---------------- */
     // Bump when the default script changes so returning browsers refresh their cached copy.
-    const SCRIPT_VERSION = 6;
+    const SCRIPT_VERSION = 7;
     let touchpoints = load('gi_touchpoints', DEFAULT_TOUCHPOINTS);
     if (load('gi_script_version', 1) !== SCRIPT_VERSION) {
         touchpoints = JSON.parse(JSON.stringify(DEFAULT_TOUCHPOINTS));
