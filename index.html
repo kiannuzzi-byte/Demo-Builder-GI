@@ -343,7 +343,7 @@
                         </div>
                         <div>
                             <label class="input-label">Procedure Time</label>
-                            <input type="text" id="set-time" class="txt-input" oninput="updateSetting('time', this.value)" placeholder="8:00 AM">
+                            <input type="text" id="set-time" class="txt-input" oninput="updateSetting('proctime', this.value)" placeholder="10:00 AM">
                         </div>
                     </div>
                     <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-[11px] text-blue-800 leading-relaxed">
@@ -463,7 +463,7 @@
         patient: "Margaret",
         hospital: "Virginia Mason Franciscan Health",
         location: "St. Joseph Medical Center",
-        proctime: "8:00 AM"
+        proctime: "10:00 AM"
     };
 
     /* ---- Full preloaded CommonSpirit GI split-dose colonoscopy prep script ----
@@ -505,7 +505,7 @@
                 "One quick check-in: have you been able to pick up your bowel-prep kit from the pharmacy yet?"
             ],
             choices: [
-                { text: "Not yet, planning to grab it today", ack: "Thanks for letting us know, {patient}. Please pick it up today so you're ready when your prep starts. If the pharmacy has any trouble filling it, just reply here and we'll help sort it out." }
+                { text: "Not yet, planning to grab it today", ack: "Thanks for letting us know, {patient}. Please pick it up today so you're ready when your prep starts. Do you need any assistance with this?", followup: { text: "No, I think I should be okay.", ack: "" } }
             ]
         },
         {
@@ -514,10 +514,10 @@
                 "Hi {patient}, two days to go. Time to stock up on clear liquids for the day before your procedure.",
                 "Clear means anything you can see through: water, apple or white-grape juice, clear broth, black coffee or tea without milk, Sprite or 7-Up, plain Jell-O, and light-colored Gatorade or Powerade.",
                 "Please avoid anything red or purple, since the dye can look like blood during your exam. Full list of approved clear liquids: https://vmfh.org/gi/clear-liquids",
-                "Any questions about what counts as a clear liquid? Just reply and let us know."
+                "Do you feel like you understand these instructions?"
             ],
             choices: [
-                { text: "Is black coffee with no milk okay", ack: "Good question, {patient}. You can check any drink against your approved clear-liquids list here: https://vmfh.org/gi/clear-liquids" }
+                { text: "No actually I do have a question about whether or not I can drink black coffee?", ack: "Good question, {patient}. You can check any drink against your approved clear-liquids list here: https://vmfh.org/gi/clear-liquids" }
             ]
         },
         {
@@ -536,10 +536,10 @@
             messages: [
                 "It's time, {patient}. Please start the first dose of your bowel prep now. Follow the exact mixing and timing instructions on your kit.",
                 "What to expect: frequent, watery bowel movements within an hour or two. Stay near a bathroom and keep sipping clear fluids. Step-by-step prep instructions are here: https://vmfh.org/gi/prep-instructions",
-                "How is it going with the prep this evening?"
+                "Do you have any barriers to starting your first dose of bowel prep this evening?"
             ],
             choices: [
-                { text: "Started it, it's a lot to drink but I'm getting it down", ack: "You're doing great, {patient}. That is completely normal. Keep sipping clear fluids, and we'll text you early tomorrow morning when it's time for the second dose." }
+                { text: "No, I should be okay to start.", ack: "That's great to hear, {patient}. Follow the mixing and timing steps on your kit and keep sipping clear fluids. We'll text you early tomorrow morning when it's time for the second dose." }
             ]
         },
         {
@@ -548,11 +548,12 @@
                Hours window -- not at an arbitrary "N hours before" for each patient.
                So the day-of is ONE consolidated early-morning send whose exact times
                (dose 2, NPO, arrival) are personalized per patient via playback fields. */
-            id: 7, dayOffset: 0, time: "4:00 AM", label: "Day of — reminder, dose 2 & arrival",
+            id: 7, dayOffset: 0, time: "7:00 AM", label: "Day of — reminder, dose 2 & arrival",
             messages: [
                 "Good morning, {patient}. Reminder: your colonoscopy is today at {proctime}, at {location}.",
                 "Start your second prep dose now, at {dose2}. Then nothing to eat or drink, including water, after {npo}.",
-                "Please arrive by {arrival} with your ID, insurance card, and a ride. Quick check: are your stools now clear or light-yellow liquid? If not, reply and a nurse will call before you come in."
+                "Please arrive at least 30 minutes before your appointment, with your ID, insurance card, and a ride. Quick check: are your stools now clear or light-yellow liquid? If not, reply and a nurse will call before you come in.",
+                "Parking and building navigation instructions are here: https://vmfh.org/locations/st-joseph/parking-and-directions"
             ],
             choices: [
                 { text: "Not quite, still a little cloudy", escalate: true, ack: "Thank you for checking, {patient}. Please hold off on heading in for now. A nurse from our care team will call you shortly to guide you through the next steps so we can keep your procedure on track. Please keep your phone close." }
@@ -573,10 +574,14 @@
 
     /* ---------------- State ---------------- */
     // Bump when the default script changes so returning browsers refresh their cached copy.
-    const SCRIPT_VERSION = 8;
+    const SCRIPT_VERSION = 9;
     let touchpoints = load('gi_touchpoints', DEFAULT_TOUCHPOINTS);
     if (load('gi_script_version', 1) !== SCRIPT_VERSION) {
         touchpoints = JSON.parse(JSON.stringify(DEFAULT_TOUCHPOINTS));
+        // Migrate cached settings to the new default appointment time while
+        // preserving any other customizations the presenter made.
+        const s = load('gi_settings', null);
+        if (s) { s.proctime = DEFAULTS.proctime; localStorage.setItem('gi_settings', JSON.stringify(s)); }
         localStorage.setItem('gi_script_version', JSON.stringify(SCRIPT_VERSION));
     }
     let settings = load('gi_settings', null) || {
@@ -589,7 +594,9 @@
 
     let currentTp = -1;       // index of last revealed touchpoint
     let awaitingReply = false; // current tp has unanswered choices
+    let awaitingFollowup = false; // current tp has a pending second-turn patient reply
     let replied = {};          // index -> chosen choice index
+    let followedUp = {};       // index -> true once the follow-up reply has played
     let isProcessing = false;
 
     /* ---------------- Helpers ---------------- */
@@ -624,11 +631,11 @@
     // so one early-morning same-day send states each patient's own times.
     function playbackTimes() {
         const proc = parseClock(settings.proctime || DEFAULTS.proctime);
-        if (proc == null) return { dose2: '4:00 AM', npo: '6:00 AM', arrival: '7:15 AM' };
+        if (proc == null) return { dose2: '7:00 AM', npo: '8:00 AM', arrival: '9:30 AM' };
         return {
-            dose2: fmtClock(proc - 240),   // start second (split) dose ~4 hrs before procedure
+            dose2: fmtClock(proc - 180),   // start second (split) dose ~3 hrs before procedure (matches the 7am send)
             npo: fmtClock(proc - 120),     // nothing by mouth ~2 hrs before procedure
-            arrival: fmtClock(proc - 45)   // arrive ~45 min before procedure
+            arrival: fmtClock(proc - 30)   // arrive ~30 min before procedure
         };
     }
 
@@ -764,7 +771,7 @@
     /* ---------------- Reveal / navigation ---------------- */
     function updateCamera() {
         const cam = document.getElementById('camera-trigger');
-        const atEnd = (currentTp >= touchpoints.length - 1) && !awaitingReply;
+        const atEnd = (currentTp >= touchpoints.length - 1) && !awaitingReply && !awaitingFollowup;
         if (!isProcessing && !atEnd) cam.classList.add('ios-icon-ready');
         else cam.classList.remove('ios-icon-ready');
     }
@@ -810,6 +817,31 @@
             addBubble(choice.ack, 'bot');
             await wait(300);
         }
+        // If the ack poses a follow-up question, queue the patient's second reply.
+        awaitingFollowup = !!choice.followup;
+        isProcessing = false;
+        updateCamera();
+        renderNav();
+    }
+
+    // Type out a second-turn patient reply (answering a follow-up question in the ack).
+    async function playFollowup() {
+        if (isProcessing || !awaitingFollowup) return;
+        const tp = touchpoints[currentTp];
+        const choice = (tp.choices || [])[replied[currentTp]];
+        const fu = choice && choice.followup;
+        if (!fu) { awaitingFollowup = false; return; }
+        isProcessing = true;
+        awaitingFollowup = false;
+        document.getElementById('camera-trigger').classList.remove('ios-icon-ready');
+        await simulateUserTyping(fu.text);
+        followedUp[currentTp] = true;
+        updateReceipt();
+        if (fu.ack) {
+            await showTyping();
+            addBubble(fu.ack, 'bot');
+            await wait(300);
+        }
         isProcessing = false;
         updateCamera();
         renderNav();
@@ -819,12 +851,15 @@
     async function stepAdvance() {
         if (isProcessing) return;
         if (awaitingReply) { await selectChoice(0); return; }
+        if (awaitingFollowup) { await playFollowup(); return; }
         if (currentTp < touchpoints.length - 1) { await revealTouchpoint(currentTp + 1); }
     }
 
     // Rebuild the whole thread instantly up to a target index (used by nav jumps)
     function showThreadInstant(target) {
         feed().innerHTML = '';
+        awaitingReply = false;
+        awaitingFollowup = false;
         for (let i = 0; i <= target; i++) {
             const tp = touchpoints[i];
             addDivider(tp);
@@ -834,6 +869,14 @@
                     const c = tp.choices[replied[i]];
                     addBubble(c.text, 'user');
                     if (c.ack) addBubble(c.ack, 'bot');
+                    if (c.followup) {
+                        if (followedUp[i]) {
+                            addBubble(c.followup.text, 'user');
+                            if (c.followup.ack) addBubble(c.followup.ack, 'bot');
+                        } else if (i === target) {
+                            awaitingFollowup = true;
+                        }
+                    }
                 } else if (i === target) {
                     // Reply is pending; it will type out on the next Advance.
                     awaitingReply = true;
@@ -850,14 +893,17 @@
         if (isProcessing) return;
         currentTp = target;
         awaitingReply = false;
+        awaitingFollowup = false;
         // Auto-answer skipped touchpoints with their default (first) reply for a continuous thread
         for (let i = 0; i < target; i++) {
             if ((touchpoints[i].choices || []).length && replied[i] === undefined) replied[i] = 0;
+            const c = (touchpoints[i].choices || [])[replied[i]];
+            if (c && c.followup) followedUp[i] = true; // skipped exchanges render complete
         }
         // Anything past the target is "un-happened"
-        for (let i = target + 1; i < touchpoints.length; i++) delete replied[i];
+        for (let i = target + 1; i < touchpoints.length; i++) { delete replied[i]; delete followedUp[i]; }
         // Reopen the target's choices so the presenter can pick a branch live
-        if ((touchpoints[target].choices || []).length) delete replied[target];
+        if ((touchpoints[target].choices || []).length) { delete replied[target]; delete followedUp[target]; }
         showThreadInstant(target);
         updateCamera();
         renderNav();
@@ -865,8 +911,10 @@
 
     function restartThread() {
         replied = {};
+        followedUp = {};
         currentTp = -1;
         awaitingReply = false;
+        awaitingFollowup = false;
         feed().innerHTML = '';
         renderNav();
         revealTouchpoint(0);
