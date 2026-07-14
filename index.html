@@ -552,8 +552,8 @@
             messages: [
                 "Good morning, {patient}. Reminder: your colonoscopy is today at {proctime}, at {location}.",
                 "Start your second prep dose now, at {dose2}. Then nothing to eat or drink, including water, after {npo}.",
-                "Please arrive at least 30 minutes before your appointment, with your ID, insurance card, and a ride. Quick check: are your stools now clear or light-yellow liquid? If not, reply and a nurse will call before you come in.",
-                "Parking and building navigation instructions are here: https://vmfh.org/locations/st-joseph/parking-and-directions"
+                "Parking and building navigation instructions are here: https://vmfh.org/locations/st-joseph/parking-and-directions",
+                "Please arrive at least 30 minutes before your appointment, with your ID, insurance card, and a ride. Quick check: are your stools now clear or light-yellow liquid?"
             ],
             choices: [
                 { text: "Not quite, still a little cloudy", escalate: true, ack: "Thank you for checking, {patient}. Please hold off on heading in for now. A nurse from our care team will call you shortly to guide you through the next steps so we can keep your procedure on track. Please keep your phone close." }
@@ -574,7 +574,7 @@
 
     /* ---------------- State ---------------- */
     // Bump when the default script changes so returning browsers refresh their cached copy.
-    const SCRIPT_VERSION = 9;
+    const SCRIPT_VERSION = 10;
     let touchpoints = load('gi_touchpoints', DEFAULT_TOUCHPOINTS);
     if (load('gi_script_version', 1) !== SCRIPT_VERSION) {
         touchpoints = JSON.parse(JSON.stringify(DEFAULT_TOUCHPOINTS));
