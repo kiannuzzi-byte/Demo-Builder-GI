@@ -671,7 +671,7 @@
         return base;
     }
     const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const MO = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     function fmtDivider(d) { return `${WD[d.getDay()]}, ${MO[d.getMonth()]} ${d.getDate()}`; }
     function fmtDateLong(d) { return `${WD[d.getDay()]}, ${MO[d.getMonth()]} ${d.getDate()}`; }
     function dayLabel(off) { return off === 0 ? 'Day 0' : (off > 0 ? `Day +${off}` : `Day ${off}`); }
