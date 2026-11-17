@@ -479,7 +479,7 @@
             messages: [
                 "Hi {patient}, this is the care team at {hospital}. Over the next two weeks we'll send a few reminders to help you get ready for your colonoscopy on {procdate} at {proctime}.",
                 "Your procedure will be at {location}. Message and data rates may apply. Reply STOP to opt out at any time.",
-                "First, a quick medication check so we can keep you safe. Do you take any of the following: GLP-1 or weight-loss medications (Ozempic, Wegovy, Mounjaro, Zepbound), blood thinners (warfarin, Eliquis, Plavix), or iron supplements? Full list of medications to review: https://vmfh.org/gi/medication-holds"
+                "First, a quick medication check so we can keep you safe. Do you take any of the following: GLP-1 or weight-loss medications (Ozempic, Wegovy, Mounjaro, Zepbound), blood thinners (warfarin, Eliquis, Plavix), or iron supplements? Full list of medications to review: https://regoparkendoscopy.com/prep/medication-holds"
             ],
             choices: [
                 { text: "Yes, I take Ozempic once a week", escalate: true, ack: "Thank you for letting us know, {patient}. Because these types of medications often need to be paused before your procedure, a nurse from our care team will follow up with you shortly with personalized instructions. Please do not stop any medication until you hear from us." }
@@ -489,7 +489,7 @@
             id: 2, dayOffset: -7, time: "10:00 AM", label: "Prep kit, medication holds & ride",
             messages: [
                 "Hi {patient}, one week until your colonoscopy on {procdate}. A few important to-dos this week.",
-                "1) Pick up your bowel-prep kit from the pharmacy now if you haven't yet. 2) If a nurse asked you to pause a medication, this is the week to follow those instructions. Here is a quick overview of what to expect: https://vmfh.org/gi/colonoscopy-prep",
+                "1) Pick up your bowel-prep kit from the pharmacy now if you haven't yet. 2) If a nurse asked you to pause a medication, this is the week to follow those instructions. Here is a quick overview of what to expect: https://regoparkendoscopy.com/prep/colonoscopy-prep",
                 "3) Because you'll be sedated, an adult must drive you home and stay with you afterward. You cannot drive, take a bus, or rideshare alone. Do you have a ride arranged?"
             ],
             choices: [
@@ -501,7 +501,7 @@
             messages: [
                 "Good morning, {patient}. Starting today, please switch to a low-fiber (low-residue) diet. This helps your prep work as well as possible.",
                 "OK to eat: white bread, white rice, plain pasta, eggs, well-cooked skinless chicken or fish, broth, yogurt, and cheese. Please avoid: nuts, seeds, popcorn, whole grains, raw or high-fiber vegetables, beans, and fruit with skins.",
-                "Here is a printable low-fiber food list you can keep handy: https://vmfh.org/gi/low-fiber-diet",
+                "Here is a printable low-fiber food list you can keep handy: https://regoparkendoscopy.com/prep/low-fiber-diet",
                 "One quick check-in: have you been able to pick up your bowel-prep kit from the pharmacy yet?"
             ],
             choices: [
@@ -513,11 +513,11 @@
             messages: [
                 "Hi {patient}, two days to go. Time to stock up on clear liquids for the day before your procedure.",
                 "Clear means anything you can see through: water, apple or white-grape juice, clear broth, black coffee or tea without milk, Sprite or 7-Up, plain Jell-O, and light-colored Gatorade or Powerade.",
-                "Please avoid anything red or purple, since the dye can look like blood during your exam. Full list of approved clear liquids: https://vmfh.org/gi/clear-liquids",
+                "Please avoid anything red or purple, since the dye can look like blood during your exam. Full list of approved clear liquids: https://regoparkendoscopy.com/prep/clear-liquids",
                 "Do you feel like you understand these instructions?"
             ],
             choices: [
-                { text: "No actually I do have a question about whether or not I can drink black coffee?", ack: "Good question, {patient}. You can check any drink against your approved clear-liquids list here: https://vmfh.org/gi/clear-liquids" }
+                { text: "No actually I do have a question about whether or not I can drink black coffee?", ack: "Good question, {patient}. You can check any drink against your approved clear-liquids list here: https://regoparkendoscopy.com/prep/clear-liquids" }
             ]
         },
         {
@@ -535,7 +535,7 @@
             id: 6, dayOffset: -1, time: "5:00 PM", label: "Start first prep dose",
             messages: [
                 "It's time, {patient}. Please start the first dose of your bowel prep now. Follow the exact mixing and timing instructions on your kit.",
-                "What to expect: frequent, watery bowel movements within an hour or two. Stay near a bathroom and keep sipping clear fluids. Step-by-step prep instructions are here: https://vmfh.org/gi/prep-instructions",
+                "What to expect: frequent, watery bowel movements within an hour or two. Stay near a bathroom and keep sipping clear fluids. Step-by-step prep instructions are here: https://regoparkendoscopy.com/prep/instructions",
                 "Do you have any barriers to starting your first dose of bowel prep this evening?"
             ],
             choices: [
@@ -552,7 +552,7 @@
             messages: [
                 "Good morning, {patient}. Reminder: your colonoscopy is today at {proctime}, at {location}.",
                 "Start your second prep dose now, at {dose2}. Then nothing to eat or drink, including water, after {npo}.",
-                "Parking and building navigation instructions are here: https://vmfh.org/locations/st-joseph/parking-and-directions",
+                "Parking and building navigation instructions are here: https://regoparkendoscopy.com/visit/parking-directions",
                 "Please arrive at least 30 minutes before your appointment, with your ID, insurance card, and a ride. Quick check: are your stools now clear or light-yellow liquid?"
             ],
             choices: [
@@ -563,7 +563,7 @@
             id: 8, dayOffset: 1, time: "10:00 AM", label: "Next-day recovery & feedback",
             messages: [
                 "Good morning, {patient}. We hope your colonoscopy went smoothly yesterday. One day out, how are you feeling today?",
-                "You should be back to your normal diet and routine. A little bloating or gas can be normal for a short while. Your doctor's office will share your results and any follow-up timing, and any medications you paused can usually be resumed now — if you're unsure, just call us. Please seek care for heavy rectal bleeding, severe or worsening belly pain, a fever over 100.4 degrees, or dizziness. After-care guide: https://vmfh.org/gi/after-your-colonoscopy",
+                "You should be back to your normal diet and routine. A little bloating or gas can be normal for a short while. Your doctor's office will share your results and any follow-up timing, and any medications you paused can usually be resumed now — if you're unsure, just call us. Please seek care for heavy rectal bleeding, severe or worsening belly pain, a fever over 100.4 degrees, or dizziness. After-care guide: https://regoparkendoscopy.com/recovery/after-your-colonoscopy",
                 "One last thing: on a scale of 1 to 5, how was your prep experience with us? Your feedback helps us care better for every patient."
             ],
             choices: [
